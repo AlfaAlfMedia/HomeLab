@@ -10,18 +10,45 @@
 
 set -e
 
-# Überprüfe, ob jq installiert ist
-if ! command -v jq >/dev/null 2>&1; then
-    echo "Fehler: jq ist nicht installiert. Bitte installiere jq z.B. mit:"
-    echo "  sudo apt update && sudo apt install jq"
-    exit 1
+# Überprüfe, ob alle erforderlichen Programme installiert sind
+REQUIRED=("sudo" "jq" "certbot" "curl")
+MISSING=()
+
+for CMD in "${REQUIRED[@]}"; do
+  if ! command -v "$CMD" >/dev/null 2>&1; then
+    MISSING+=("$CMD")
+  fi
+done
+
+if [ ${#MISSING[@]} -gt 0 ]; then
+  echo "Es fehlen zur Ausführung erforderliche Programme: ${MISSING[*]}"
+  echo "Bitte installieren Sie diese, z.B. mit:"
+  echo "  sudo apt update && sudo apt install ${MISSING[*]}"
+  exit 1
 fi
 
-# sudo initialisieren und Ticket im Hintergrund verlängern
-echo "Überprüfe sudo-Berechtigungen..."
+echo "Alle erforderlichen Programme sind installiert."
+
+# Überprüfe und initialisiere sudo-Zugang
+echo "Überprüfe sudo-Zugang..."
+if ! sudo -n true 2>/dev/null; then
+  echo "Fehler: Sie haben keine ausreichenden sudo-Rechte oder sudo erfordert ein Passwort."
+  echo "Bitte führen Sie dieses Skript als root aus oder verwenden Sie einen Benutzer mit sudo-Rechten."
+  exit 1
+fi
+
+# sudo ist verfügbar – initialisiere das Ticket
+echo "Sudo-Zugang ist vorhanden."
 sudo -v
-( while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done ) 2>/dev/null &
-echo "Sudo-Ticket aktiviert."
+
+# Halte das sudo-Ticket im Hintergrund aktiv
+echo "Sudo-Ticket wird im Hintergrund aktiv gehalten..."
+( while true; do 
+    sudo -n true 
+    sleep 60 
+    kill -0 "$$" || exit; 
+  done ) 2>/dev/null &
+echo "Sudo-Ticket aktiv."
 
 # Laden der Umgebungsvariablen aus der .env-Datei
 ENV_FILE="$(dirname "$0")/.env"
@@ -150,7 +177,8 @@ main_certificate() {
       --manual-auth-hook "$(realpath "$0") auth" \
       --manual-cleanup-hook "$(realpath "$0") cleanup" \
       $STAGING_OPTION \
-      -d "$DOMAIN"
+      -d "$DOMAIN" \
+      -d "*.$DOMAIN"
 
     echo "Zertifikatserstellung abgeschlossen."
     echo "-------------------------------------------"
