@@ -1,0 +1,61 @@
+# Optional: Mapping für WebSocket-Upgrades (nützlich, falls benötigt)
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+
+# HTTP-Weiterleitung auf HTTPS
+server {
+    listen 80;
+    listen [::]:80;
+    # Ersetze "sub.example.com" mit deiner öffentlichen Domain
+    server_name sub.example.com;
+    
+    # 301 Redirect zu HTTPS
+    return 301 https://$host$request_uri;
+}
+
+# HTTPS-Server mit optimierter TLS-Konfiguration und Reverse Proxy
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    # Ersetze "sub.example.com" mit deiner öffentlichen Domain
+    server_name sub.example.com;
+
+    # SSL-Zertifikate
+    # Ersetze "example.com" mit deiner Domain
+    ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
+
+    # TLS-Härtung
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+    ssl_ciphers 'ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305';
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 1d;
+    ssl_stapling on;
+    ssl_stapling_verify on;
+
+    # Sicherheitsheader
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-Frame-Options DENY;
+    add_header X-XSS-Protection "1; mode=block";
+
+    # Proxy-Einstellungen: Leitet Anfragen an Portainer weiter
+    location / {
+        # Ersetze "internal.example.com" und den Port durch deine internen Angaben
+        proxy_pass https://internal.example.com:port;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+
+        # SSL-Verifikation des Upstream-Servers (aktiviere dies, wenn dein Upstream-Zertifikat vertrauenswürdig ist)
+        #proxy_ssl_verify on;
+        #proxy_ssl_trusted_certificate /usr/share/ssl-cert/portainer.crt;
+        #proxy_ssl_server_name on;
+    }
+}
