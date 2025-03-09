@@ -163,10 +163,23 @@ main_certificate() {
         echo "Staging-Modus ist deaktiviert. Produktivzertifikat wird angefordert."
     fi
 
+    # Prüfe, ob bereits ein Zertifikat existiert
+    # Hier wird angenommen, dass für die Basis-Domain eine Renewal-Konfigurationsdatei vorhanden ist
+    CERT_RENEWAL_CONF="/etc/letsencrypt/renewal/$DOMAIN.conf"
+    if [ -f "$CERT_RENEWAL_CONF" ]; then
+        echo "Vorhandenes Zertifikat gefunden (Datei: $CERT_RENEWAL_CONF)."
+        echo "Füge --expand hinzu, um das bestehende Zertifikat zu erweitern."
+        EXPAND="--expand"
+    else
+        EXPAND=""
+    fi
+
     echo "Rufe Certbot mit den folgenden Parametern auf:"
     echo "  E-Mail: $EMAIL"
-    echo "  Domain: $DOMAIN"
-
+    echo "  Domain: $DOMAIN und *.$DOMAIN"
+    echo "  Staging-Option: $STAGING_OPTION"
+    echo "  Expand-Option: $EXPAND"
+    
     # Certbot aufrufen. Dabei wird dieses Skript als Auth- und Cleanup-Hook genutzt.
     sudo certbot certonly \
       --non-interactive \
@@ -177,12 +190,14 @@ main_certificate() {
       --manual-auth-hook "$(realpath "$0") auth" \
       --manual-cleanup-hook "$(realpath "$0") cleanup" \
       $STAGING_OPTION \
+      $EXPAND \
       -d "$DOMAIN" \
       -d "*.$DOMAIN"
-
+    
     echo "Zertifikatserstellung abgeschlossen."
     echo "-------------------------------------------"
 }
+
 
 # Modus basierend auf dem ersten Parameter auswählen
 # Dieses Skript ruft sich selbst mit unterschiedlichen Parametern auf:
