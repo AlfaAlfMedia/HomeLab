@@ -1,0 +1,19 @@
+services:
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: Portainer
+    restart: unless-stopped
+    #networks:
+    #  - DockerLAN
+    ports:
+      - "9443:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data:/data
+      - ./ssl:/certs
+    # user-id and docker group-id - above mounts must be accesable and writeable by this user
+    #user: "<user-id>:<docker group-id>"
+
+#networks:
+#  DockerLAN:
+#    external: true
