@@ -27,12 +27,12 @@ Ein einfaches Bash-Skript zur Automatisierung von Updates auf einem Debian-basie
 1.  **Skript herunterladen/kopieren:**
     Lade die `.sh`-Datei aus diesem Repository herunter oder klone das Repository. Kopiere das Skript an einen geeigneten Ort, z.B.:
     ```bash
-    sudo cp run_pihole_updates.sh /usr/local/sbin/
+    sudo cp pihole-update.sh /usr/local/sbin/
     ```
 
 2.  **Ausführbar machen:**
     ```bash
-    sudo chmod +x /usr/local/sbin/run_pihole_updates.sh
+    sudo chmod +x /usr/local/sbin/pihole-update.sh
     ```
 
 3.  **Konfigurationsdatei erstellen:**
@@ -60,7 +60,7 @@ Ein einfaches Bash-Skript zur Automatisierung von Updates auf einem Debian-basie
 1.  **Manueller Test:**
     Du kannst das Skript manuell als Root ausführen, um die Funktionalität zu testen:
     ```bash
-    sudo /usr/local/sbin/run_pihole_updates.sh
+    sudo /usr/local/sbin/pihole-update.sh
     ```
     Überprüfe die Terminal-Ausgabe und die Logdatei (standardmäßig in `/var/log/cron-update/`).
 
