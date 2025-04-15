@@ -1,0 +1,86 @@
+# Linux System Locale Konfigurations-Skript (UTF-8)
+
+Dieses Skript hilft dabei, die System-Locale auf einem Debian-basierten Linux-System (wie Debian, Ubuntu, Raspberry Pi OS) auf eine UTF-8-Variante (standardmäßig `de_DE.UTF-8`) zu setzen.
+
+## Problembeschreibung
+
+Werden Sonderzeichen wie deutsche Umlaute (ä, ö, ü) oder andere internationale Zeichen in SSH-Sitzungen oder auf der Konsole nicht korrekt dargestellt (z.B. als Fragezeichen, Leerzeichen oder seltsame Symbolkombinationen)? Dies liegt oft an einer inkonsistenten Zeichenkodierungs-Einstellung (Character Encoding) zwischen dem Server und dem SSH-Client. Beide müssen dieselbe Kodierung, idealerweise UTF-8, verwenden.
+
+## Was das Skript tut
+
+1.  **Prüft die aktuelle Locale:** Stellt fest, ob die gewünschte Locale (z.B. `de_DE.UTF-8`) bereits als Systemstandard gesetzt ist. Wenn ja, beendet es sich ohne Änderungen.
+2.  **Installiert `locales`:** Prüft, ob das Paket `locales` installiert ist und installiert es bei Bedarf mittels `apt-get`.
+3.  **Aktiviert Locale:** Stellt sicher, dass die gewünschte Locale in der Datei `/etc/locale.gen` vorhanden und aktiviert (nicht auskommentiert) ist.
+4.  **Generiert Locales:** Führt `locale-gen` aus, um die notwendigen Locale-Dateien zu erstellen/aktualisieren.
+5.  **Setzt System-Standard:** Konfiguriert die gewünschte Locale als systemweiten Standard mittels `localectl` (bevorzugt, falls vorhanden) oder `update-locale`.
+6.  **Informiert den Nutzer:** Gibt Hinweise aus, was getan wurde und dass ein Neustart oder erneutes Anmelden für die vollständige Übernahme der Änderungen notwendig ist.
+
+## Anwendung des Skripts
+
+1.  **Herunterladen/Kopieren:** Lade das Skript (`set_locale.sh` oder ähnlich benannt) auf deinen Server oder kopiere den Inhalt in eine neue Datei. Ein guter Ort ist oft `/usr/local/sbin/`.
+    ```bash
+    # Beispiel:
+    sudo wget -O /usr/local/sbin/set_system_locale.sh DEIN_RAW_GITHUB_LINK_HIER
+    # ODER manuell erstellen:
+    sudo nano /usr/local/sbin/set_system_locale.sh # Inhalt reinkopieren
+    ```
+
+2.  **Anpassen (Optional):**
+    Standardmäßig ist das Skript auf `de_DE.UTF-8` eingestellt. Wenn du eine andere UTF-8-Locale benötigst (z.B. `en_US.UTF-8`), bearbeite die Variable `DESIRED_LOCALE` am Anfang des Skripts:
+    ```bash
+    sudo nano /usr/local/sbin/set_system_locale.sh
+    # Ändere DESIRED_LOCALE="de_DE.UTF-8" zu z.B. DESIRED_LOCALE="en_US.UTF-8"
+    ```
+
+3.  **Ausführbar machen:**
+    ```bash
+    sudo chmod +x /usr/local/sbin/set_system_locale.sh
+    ```
+
+4.  **Als Root ausführen:**
+    ```bash
+    sudo /usr/local/sbin/set_system_locale.sh
+    ```
+    Beachte die Ausgaben des Skripts.
+
+5.  **WICHTIG: Neu Anmelden oder Server Neustarten!**
+    Damit die geänderten Locale-Einstellungen systemweit und für deine SSH-Sitzung korrekt übernommen werden, musst du dich **unbedingt vom Server ab- und wieder anmelden** oder den **Server neu starten**.
+
+## Wichtig: Konfiguration des SSH-Clients
+
+Das Einstellen der Locale auf dem Server ist nur die halbe Miete! Dein SSH-Client (das Programm auf deinem Computer, mit dem du dich verbindest) muss ebenfalls wissen, dass er UTF-8 verwenden soll, um die vom Server gesendeten Zeichen korrekt darzustellen.
+
+Hier Anleitungen für gängige Clients:
+
+### MobaXterm
+
+1.  Gehe zu `Settings` -> `Configuration`.
+2.  Wähle den Reiter `Terminal`.
+3.  Stelle sicher, dass bei **"Terminal characters set"** die Option **`UTF-8`** ausgewählt ist.
+4.  Gehe zum Reiter `SSH`.
+5.  Stelle sicher, dass die Option **"Use UTF-8 encoding for SSH connections"** **aktiviert** ist.
+6.  Klicke `OK`, um die Einstellungen zu speichern.
+7.  **Schließe deine aktuelle SSH-Sitzung** und öffne eine neue Verbindung zum Server.
+
+### PuTTY
+
+1.  Starte PuTTY. Bevor du die Verbindung öffnest, lade deine gespeicherte Sitzung (falls vorhanden) oder konfiguriere die "Default Settings".
+2.  Gehe im Konfigurationsbaum links zu `Window` -> `Translation`.
+3.  In der Dropdown-Liste **"Remote character set"** wähle **`UTF-8`**. (Dies ist oft die Standardeinstellung, aber überprüfe es).
+4.  *Optional aber empfohlen:* Gehe zurück zu `Session`. Wähle deine gespeicherte Sitzung (oder "Default Settings") erneut aus und klicke auf `Save`, damit die Einstellung für zukünftige Verbindungen erhalten bleibt.
+5.  Öffne die Verbindung zum Server. Wenn die Verbindung bereits bestand, **schließe sie und öffne sie neu**.
+
+## Testen
+
+Nachdem du das Skript auf dem Server ausgeführt, dich neu angemeldet (oder neu gestartet) *und* deinen SSH-Client auf UTF-8 konfiguriert hast:
+
+1.  Verbinde dich neu per SSH mit deinem Server.
+2.  Gib in der Kommandozeile ein:
+    ```bash
+    echo "Test: Äpfel, Öffnen, Übermut - äöü ÄÖÜ ß €"
+    ```
+3.  Die Ausgabe sollte jetzt alle Sonderzeichen korrekt darstellen. Auch das Einfügen von Text mit Umlauten per Copy & Paste sollte nun funktionieren.
+
+---
+
+**Haftungsausschluss:** Dieses Skript ändert Systemkonfigurationen. Benutzung auf eigene Gefahr. Es wurde für Debian-basierte Systeme getestet.
