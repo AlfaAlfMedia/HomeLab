@@ -1,0 +1,12 @@
+# Beispielkonfiguration (update_script.example)
+# Kopieren nach /root/.config/update_script und anpassen!
+# WICHTIG: sudo chmod 600 /root/.config/update_script
+
+SYSTEM_NAME="MeinCoolesSystem"
+# LOG_DIR="/var/log/mein_updater" # Optional
+
+NTFY_URL="https://ntfy.example.com/mein_topic" # Deine NTFY URL + Topic
+NTFY_ACCESS_TOKEN="tk_DEIN_NTFY_TOKEN_HIER"   # Dein Token!
+NTFY_TAGS="server,update,warning"           # Optional
+NTFY_PRIORITY="4"                           # Optional
+NTFY_DELIVERY_TIME="9am"                    # Optional (leer = sofort)
