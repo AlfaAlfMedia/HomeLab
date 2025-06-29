@@ -68,15 +68,32 @@ sudo chmod 644 /etc/hetzner-cert-manager/config.conf
 sudo chmod 600 /etc/letsencrypt/hetzner/credentials.ini
 ```
 
+## Benutzung
+
 ### Schritt 4: Erster Zertifikatsabruf
 
-Führe das Skript zum ersten Mal aus. Es wird die `venv` unter `/opt/certbot-venv` erstellen, die notwendigen Python-Pakete installieren und anschließend das Zertifikat anfordern.
+Führe das Skript zum ersten Mal aus. Es wird empfohlen, den ersten Lauf im Staging-Modus (`STAGING=1` in `config.conf`) durchzuführen, um die Rate-Limits von Let's Encrypt nicht zu gefährden.
 
 ```bash
 sudo /usr/local/sbin/hetzner-cert-manager.sh
 ```
+Das Skript wird die `venv` unter `/opt/certbot-venv` erstellen, die notwendigen Python-Pakete installieren und anschließend das Zertifikat anfordern.
 
-### Schritt 5: Automatische Erneuerung einrichten (Sehr wichtig!)
+### Schritt 5: Wechsel von Staging zu Produktion (Wichtig!)
+
+Wenn der Testlauf mit `STAGING=1` erfolgreich war, hast du nun ein Test-Zertifikat. Wenn du jetzt einfach `STAGING=0` setzt und das Skript erneut ausführst, wird Certbot sagen, dass eine Erneuerung nicht notwendig ist.
+
+Um das **Test-Zertifikat durch ein echtes Produktions-Zertifikat zu ersetzen**, musst du eine Erneuerung erzwingen.
+
+1.  Setze `STAGING=0` in deiner `/etc/hetzner-cert-manager/config.conf`.
+2.  Führe das Skript mit dem `--force-renewal` Flag aus:
+
+```bash
+sudo /usr/local/sbin/hetzner-cert-manager.sh --force-renewal
+```
+Dieses Flag wird normalerweise nur dieses eine Mal benötigt.
+
+### Schritt 6: Automatische Erneuerung einrichten
 
 Da wir Certbot nicht über `apt` installiert haben, müssen wir den Erneuerungsprozess manuell einrichten. Wir verwenden dafür einen `systemd`-Timer.
 
@@ -125,7 +142,7 @@ sudo systemctl enable --now certbot-renew.timer
 
 Du kannst den Status des Timers jederzeit mit `sudo systemctl list-timers | grep certbot` überprüfen.
 
-### Schritt 6: Logging einrichten (Optional, empfohlen)
+### Schritt 7: Logging einrichten (Optional, empfohlen)
 
 Kopiere die `logrotate`-Konfiguration.
 ```bash
