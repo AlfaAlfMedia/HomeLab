@@ -7,10 +7,9 @@ Dieser Ansatz garantiert eine funktionierende Installation, ohne das Host-System
 ## Features
 
 * **Venv-Basiert:** Installiert Certbot und Plugins sicher in einer isolierten Umgebung (`/opt/certbot-venv`), um Konflikte zu vermeiden und die Stabilität des Host-Systems zu gewährleisten.
-* **Vollautomatisiert:** Ein einziges Skript, das die `venv` einrichtet, Abhängigkeiten installiert und den Zertifikatsabruf durchführt.
+* **Vollautomatisiert:** Ein einziges Skript, das die `venv` einrichtet, Abhängigkeiten installiert, Zertifikate abruft **und die automatische Erneuerung einrichtet**.
 * **Sicher & GitHub-Ready:** Saubere Trennung von Logik, Konfiguration und sensiblen Zugangsdaten.
 * **Transparentes Logging:** Alle Ausgaben werden auf der Konsole angezeigt und parallel in eine Log-Datei geschrieben.
-* **Inklusive Erneuerung:** Die Anleitung enthält eine fertige `systemd`-Unit zur Einrichtung der vollautomatischen Zertifikatserneuerung.
 
 ## Dateien in diesem Repository
 
@@ -77,13 +76,11 @@ Führe das Skript zum ersten Mal aus. Es wird empfohlen, den ersten Lauf im Stag
 ```bash
 sudo /usr/local/sbin/hetzner-cert-manager.sh
 ```
-Das Skript wird die `venv` unter `/opt/certbot-venv` erstellen, die notwendigen Python-Pakete installieren und anschließend das Zertifikat anfordern.
+Das Skript wird die `venv` unter `/opt/certbot-venv` erstellen (falls noch nicht vorhanden) und anschließend das Zertifikat anfordern.
 
 ### Schritt 5: Wechsel von Staging zu Produktion (Wichtig!)
 
-Wenn der Testlauf mit `STAGING=1` erfolgreich war, hast du nun ein Test-Zertifikat. Wenn du jetzt einfach `STAGING=0` setzt und das Skript erneut ausführst, wird Certbot sagen, dass eine Erneuerung nicht notwendig ist.
-
-Um das **Test-Zertifikat durch ein echtes Produktions-Zertifikat zu ersetzen**, musst du eine Erneuerung erzwingen.
+Wenn der Testlauf mit `STAGING=1` erfolgreich war, hast du nun ein Test-Zertifikat. Um dieses **durch ein echtes Produktions-Zertifikat zu ersetzen**, musst du eine Erneuerung erzwingen.
 
 1.  Setze `STAGING=0` in deiner `/etc/hetzner-cert-manager/config.conf`.
 2.  Führe das Skript mit dem `--force-renewal` Flag aus:
@@ -95,70 +92,21 @@ Dieses Flag wird normalerweise nur dieses eine Mal benötigt.
 
 ### Schritt 6: Automatische Erneuerung einrichten
 
-Da wir Certbot nicht über `apt` installiert haben, müssen wir den Erneuerungsprozess manuell einrichten. Wir verwenden dafür einen `systemd`-Timer.
+Nachdem du dein erstes Produktions-Zertifikat erhalten hast, kannst du mit einem einzigen Befehl die automatische Erneuerung einrichten.
 
-**Teil A: Der `systemd`-Service**
-
-Erstelle eine Service-Datei, die den `renew`-Befehl ausführt.
 ```bash
-sudo nano /etc/systemd/system/certbot-renew.service
+sudo /usr/local/sbin/hetzner-cert-manager.sh setup-renewal
 ```
-Füge folgenden Inhalt ein:
-```ini
-[Unit]
-Description=Renew Let's Encrypt certificates using venv certbot
+Dieser Befehl erledigt alles Notwendige:
+* Erstellt einen `systemd`-Service, der den `certbot renew` Befehl aus der `venv` aufruft.
+* Erstellt einen `systemd`-Timer, der den Service zweimal täglich startet.
+* Aktiviert den Timer und bereinigt eventuell vorhandene, konfliktreiche Standard-Timer von `certbot`.
 
-[Service]
-Type=oneshot
-ExecStart=/opt/certbot-venv/bin/certbot renew --quiet
-
-```
-
-**Teil B: Der `systemd`-Timer**
-
-Erstelle eine Timer-Datei, die den Service zweimal täglich zu einer zufälligen Zeit startet.
-```bash
-sudo nano /etc/systemd/system/certbot-renew.timer
-```
-Füge folgenden Inhalt ein:
-```ini
-[Unit]
-Description=Run certbot-renew.service twice daily
-
-[Timer]
-OnCalendar=*-*-* 00/12:00:00
-RandomizedDelaySec=3600
-Persistent=true
-
-[Install]
-WantedBy=timers.target
-```
-
-**Teil C: Unseren Timer aktivieren**
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable --now certbot-renew.timer
-```
-
-**Teil D: Konflikte mit dem Standard-Certbot-Timer bereinigen (Wichtig!)**
-
-Auf manchen Systemen kann durch eine frühere `apt`-Installation ein standardmäßiger `certbot.timer` existieren. Dieser würde fehlschlagen, da er die Certbot-Version in unserer `venv` nicht kennt. Wir müssen sicherstellen, dass nur unser eigener Timer aktiv ist.
-
-1.  Überprüfe, ob ein konfliktreicher Timer existiert:
-    ```bash
-    sudo systemctl list-timers | grep 'certbot.timer'
-    ```
-
-2.  Wenn der obige Befehl eine Ausgabe liefert, deaktiviere den Standard-Timer:
-    ```bash
-    sudo systemctl disable --now certbot.timer
-    ```
-
-Nach diesem Schritt sollte nur noch unser `certbot-renew.timer` übrig sein, was du mit `sudo systemctl list-timers | grep certbot` überprüfen kannst.
+Du kannst den Status des Timers jederzeit mit `sudo systemctl list-timers | grep certbot` überprüfen.
 
 ### Schritt 7: Logging einrichten (Optional, empfohlen)
 
-Kopiere die `logrotate`-Konfiguration.
+Kopiere die `logrotate`-Konfiguration, um zu verhindern, dass die Log-Datei unendlich wächst.
 ```bash
 # Die Datei heißt hier der Einfachheit halber `hetzner-cert-manager`, nicht `...logrotate`
 sudo cp ./hetzner-cert-manager.logrotate /etc/logrotate.d/hetzner-cert-manager
