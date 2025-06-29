@@ -3,10 +3,11 @@
 #        Hetzner Let's Encrypt Certificate Manager (venv-Edition)
 # =================================================================
 #
-# Version: 5.2 (Stabil & Venv-basiert, unterstützt --force-renewal)
+# Version: 5.3 (Stabil & Venv-basiert, inkl. setup-renewal)
 # Zweck:   Ein robuster Wrapper zur Anforderung von Zertifikaten,
 #          der Certbot und seine Plugins sicher in einer isolierten
-#          Python Virtual Environment (venv) verwaltet.
+#          Python Virtual Environment (venv) verwaltet und die
+#          automatische Erneuerung selbstständig einrichten kann.
 #
 # =================================================================
 
@@ -31,6 +32,7 @@ setup_logging() {
     if [ "$(id -u)" -eq 0 ]; then
         touch "$LOG_FILE" && chown root:root "$LOG_FILE"
     fi
+    # Leite stdout/stderr an die Log-Datei und die Konsole weiter
     exec &> >(tee -a "$LOG_FILE")
 }
 
@@ -50,14 +52,12 @@ setup_venv() {
     VENV_PATH="${VENV_PATH:-/opt/certbot-venv}"
     CERTBOT_EXEC="$VENV_PATH/bin/certbot"
 
-    # Prüfen, ob das venv-Tool installiert ist
     if ! dpkg -s python3-venv >/dev/null 2>&1; then
         log "Paket 'python3-venv' fehlt. Installiere es..."
         apt-get update
         apt-get install -y python3-venv
     fi
 
-    # venv erstellen, falls es nicht existiert
     if [ ! -f "$CERTBOT_EXEC" ]; then
         log "Erstelle neue venv in '$VENV_PATH'..."
         python3 -m venv "$VENV_PATH"
@@ -70,55 +70,118 @@ setup_venv() {
     fi
 }
 
-# --- Hauptprozess ---
-load_config
-setup_logging
-check_root
+setup_renewal_service() {
+    log "Richte den systemd-Timer für die automatische Erneuerung ein..."
+    VENV_PATH="${VENV_PATH:-/opt/certbot-venv}" # Stelle sicher, dass der Pfad bekannt ist
+    CERTBOT_EXEC="$VENV_PATH/bin/certbot"
+    SERVICE_FILE="/etc/systemd/system/certbot-renew.service"
+    TIMER_FILE="/etc/systemd/system/certbot-renew.timer"
 
-log "Starte den Zertifikats-Manager..."
-setup_venv # Stellt sicher, dass die venv existiert und Certbot installiert ist
+    log "Erstelle Service-Datei: $SERVICE_FILE"
+    cat << EOF > "$SERVICE_FILE"
+[Unit]
+Description=Renew Let's Encrypt certificates using venv certbot
 
-# Prüfen, ob die Hetzner-Zugangsdaten existieren
-if [ ! -f "$HETZNER_CREDENTIALS_PATH" ]; then
-    log "FEHLER: Hetzner Zugangsdaten-Datei nicht gefunden unter '$HETZNER_CREDENTIALS_PATH'" >&2
-    exit 1
-fi
-log "Hetzner-Zugangsdaten-Datei gefunden."
+[Service]
+Type=oneshot
+ExecStart=$CERTBOT_EXEC renew --quiet
+EOF
 
-# Staging-Option
-staging_option=""
-if [ "$STAGING" -eq 1 ]; then
-    staging_option="--staging"
-    log "STAGING-Modus ist aktiviert."
-fi
+    log "Erstelle Timer-Datei: $TIMER_FILE"
+    cat << EOF > "$TIMER_FILE"
+[Unit]
+Description=Run certbot-renew.service twice daily
 
-# Force-Renewal-Option prüfen
-force_renewal_option=""
-# Wir prüfen, ob "--force-renewal" als Argument an das Skript übergeben wurde
-if [[ " $@ " =~ " --force-renewal " ]]; then
-    log "ERZWUNGENE ERNEUERUNG: --force-renewal Flag wurde erkannt."
-    force_renewal_option="--force-renewal"
-fi
+[Timer]
+OnCalendar=*-*-* 00/12:00:00
+RandomizedDelaySec=3600
+Persistent=true
 
-# Domain-Flags
-domain_flags=()
-for d in "${DOMAINS[@]}"; do
-    domain_flags+=(-d "$d")
-done
+[Install]
+WantedBy=timers.target
+EOF
 
-log "Rufe Certbot aus der venv auf für: ${DOMAINS[*]}"
-"$CERTBOT_EXEC" certonly \
-  --authenticator dns-hetzner \
-  --dns-hetzner-credentials "$HETZNER_CREDENTIALS_PATH" \
-  --non-interactive \
-  --agree-tos \
-  -m "$EMAIL" \
-  "${domain_flags[@]}" \
-  $staging_option \
-  $force_renewal_option
+    log "Lade systemd neu und aktiviere den Timer..."
+    systemctl daemon-reload
+    systemctl enable --now certbot-renew.timer
 
-log "-------------------------------------------"
-log "Zertifikatsprozess erfolgreich abgeschlossen!"
-log "WICHTIG: Die automatische Erneuerung muss manuell eingerichtet werden (siehe README.md)."
-log "-------------------------------------------"
+    log "Prüfe auf konfliktreiche Standard-Timer..."
+    if systemctl list-timers | grep -q 'certbot.timer'; then
+        log "Konfliktreicher 'certbot.timer' gefunden. Deaktiviere ihn..."
+        systemctl disable --now certbot.timer
+    else
+        log "Kein konfliktreicher Timer gefunden."
+    fi
 
+    log "Einrichtung der automatischen Erneuerung abgeschlossen."
+    log "Aktueller Timer-Status:"
+    systemctl list-timers | grep 'certbot-renew.timer'
+}
+
+
+main_get_cert() {
+    # Lade Konfiguration und richte Logging für diesen Prozess ein
+    load_config
+    setup_logging
+    check_root
+
+    log "Starte den Zertifikats-Manager..."
+    setup_venv
+
+    if [ ! -f "$HETZNER_CREDENTIALS_PATH" ]; then
+        log "FEHLER: Hetzner Zugangsdaten-Datei nicht gefunden unter '$HETZNER_CREDENTIALS_PATH'" >&2
+        exit 1
+    fi
+    log "Hetzner-Zugangsdaten-Datei gefunden."
+
+    staging_option=""
+    if [ "$STAGING" -eq 1 ]; then
+        staging_option="--staging"
+        log "STAGING-Modus ist aktiviert."
+    fi
+
+    force_renewal_option=""
+    if [[ " $@ " =~ " --force-renewal " ]]; then
+        log "ERZWUNGENE ERNEUERUNG: --force-renewal Flag wurde erkannt."
+        force_renewal_option="--force-renewal"
+    fi
+
+    domain_flags=()
+    for d in "${DOMAINS[@]}"; do
+        domain_flags+=(-d "$d")
+    done
+
+    log "Rufe Certbot aus der venv auf für: ${DOMAINS[*]}"
+    VENV_PATH="${VENV_PATH:-/opt/certbot-venv}"
+    CERTBOT_EXEC="$VENV_PATH/bin/certbot"
+    
+    "$CERTBOT_EXEC" certonly \
+      --authenticator dns-hetzner \
+      --dns-hetzner-credentials "$HETZNER_CREDENTIALS_PATH" \
+      --non-interactive \
+      --agree-tos \
+      -m "$EMAIL" \
+      "${domain_flags[@]}" \
+      $staging_option \
+      $force_renewal_option
+
+    log "-------------------------------------------"
+    log "Zertifikatsprozess erfolgreich abgeschlossen!"
+    log "-------------------------------------------"
+}
+
+# --- Skript-Router (Haupteinstiegspunkt) ---
+
+# Prüfe auf spezielle Kommandos. Wenn keines gegeben ist, wird die Standardaktion ausgeführt.
+case "$1" in
+    setup-renewal)
+        load_config # Muss zuerst geladen werden, um VENV_PATH zu kennen
+        setup_logging
+        check_root
+        setup_renewal_service
+        ;;
+    *)
+        # Standardaktion: Zertifikat abrufen. Übergibt alle Argumente (z.B. --force-renewal).
+        main_get_cert "$@"
+        ;;
+esac
