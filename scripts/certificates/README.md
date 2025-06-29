@@ -2,8 +2,6 @@
 
 Dieses Repository enthält ein robustes Bash-Skript zur vollautomatischen Anforderung von Let's Encrypt Zertifikaten (inkl. Wildcards). Es dient als professioneller Wrapper um das offizielle `certbot-dns-hetzner` Plugin und ist für den sicheren, stabilen Einsatz auf Debian-basierten Systemen konzipiert.
 
-Das Projekt legt Wert auf eine saubere Trennung von Logik, Konfiguration und sensiblen Zugangsdaten, um die Veröffentlichung auf GitHub zu ermöglichen, ohne dabei Geheimnisse preiszugeben.
-
 ## Features
 
 * **Plugin-Basiert:** Nutzt das offizielle `certbot-dns-hetzner` Plugin für maximale Stabilität und vermeidet fehleranfällige manuelle Hooks.
