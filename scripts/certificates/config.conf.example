@@ -3,7 +3,7 @@
 # ==========================================================
 
 # E-Mail-Adresse für wichtige Let's Encrypt Benachrichtigungen.
-EMAIL="deine.email@beispiel.de"
+EMAIL="deine.email@example.com"
 
 # Domains, für die ein Zertifikat ausgestellt werden soll.
 # WICHTIG: Muss ein Bash-Array sein. Wildcards sind möglich.
