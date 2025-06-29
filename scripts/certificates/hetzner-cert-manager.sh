@@ -3,7 +3,7 @@
 #        Hetzner Let's Encrypt Certificate Manager (venv-Edition)
 # =================================================================
 #
-# Version: 5.3 (Stabil & Venv-basiert, korrigierter Router)
+# Version: 5.4 (Stabil & Venv-basiert, konsistente Argumente)
 # Zweck:   Ein robuster Wrapper zur Anforderung von Zertifikaten,
 #          der Certbot und seine Plugins sicher in einer isolierten
 #          Python Virtual Environment (venv) verwaltet und die
@@ -174,7 +174,7 @@ check_root
 
 # Prüfe auf spezielle Kommandos. Wenn keines gegeben ist, wird die Standardaktion ausgeführt.
 case "$1" in
-    setup-renewal)
+    --setup-renewal)
         setup_renewal_service
         ;;
     *)
