@@ -1,0 +1,6 @@
+# Ignoriere die lokale Konfigurationsdatei, die Geheimnisse enthält.
+config.conf
+credentials.ini
+
+# Ignoriere Log-Dateien
+*.log
