@@ -1,0 +1,25 @@
+# ==========================================================
+#      Konfiguration für den Hetzner Certificate Manager
+# ==========================================================
+
+# E-Mail-Adresse für wichtige Let's Encrypt Benachrichtigungen.
+EMAIL="deine.email@beispiel.de"
+
+# Domains, für die ein Zertifikat ausgestellt werden soll.
+# WICHTIG: Muss ein Bash-Array sein. Wildcards sind möglich.
+DOMAINS=("subdomain.example.com" "*.example.com")
+
+# Absoluter Pfad zur separaten Hetzner Zugangsdaten-Datei,
+# die den API-Token enthält.
+HETZNER_CREDENTIALS_PATH="/etc/letsencrypt/hetzner/credentials.ini"
+
+# Staging-Modus verwenden? (1 = Ja, 0 = Nein)
+# Für Tests immer auf 1 setzen, um keine Let's Encrypt Rate-Limits zu erreichen.
+STAGING=1
+
+# Abhängigkeiten automatisch installieren? (TRUE / FALSE)
+# Wenn auf TRUE gesetzt, werden fehlende Pakete ohne weitere Nachfrage installiert.
+AUTO_INSTALL_DEPS=FALSE
+
+# Pfad zur Log-Datei. Das Skript wird alle Ausgaben hierhin schreiben.
+LOG_FILE="/var/log/hetzner-cert-manager.log"
