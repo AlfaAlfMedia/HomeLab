@@ -134,13 +134,27 @@ Persistent=true
 WantedBy=timers.target
 ```
 
-**Teil C: Timer aktivieren**
+**Teil C: Unseren Timer aktivieren**
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl enable --now certbot-renew.timer
 ```
 
-Du kannst den Status des Timers jederzeit mit `sudo systemctl list-timers | grep certbot` überprüfen.
+**Teil D: Konflikte mit dem Standard-Certbot-Timer bereinigen (Wichtig!)**
+
+Auf manchen Systemen kann durch eine frühere `apt`-Installation ein standardmäßiger `certbot.timer` existieren. Dieser würde fehlschlagen, da er die Certbot-Version in unserer `venv` nicht kennt. Wir müssen sicherstellen, dass nur unser eigener Timer aktiv ist.
+
+1.  Überprüfe, ob ein konfliktreicher Timer existiert:
+    ```bash
+    sudo systemctl list-timers | grep 'certbot.timer'
+    ```
+
+2.  Wenn der obige Befehl eine Ausgabe liefert, deaktiviere den Standard-Timer:
+    ```bash
+    sudo systemctl disable --now certbot.timer
+    ```
+
+Nach diesem Schritt sollte nur noch unser `certbot-renew.timer` übrig sein, was du mit `sudo systemctl list-timers | grep certbot` überprüfen kannst.
 
 ### Schritt 7: Logging einrichten (Optional, empfohlen)
 
