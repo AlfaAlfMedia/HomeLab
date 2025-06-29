@@ -13,6 +13,10 @@ DOMAINS=("subdomain.example.com" "*.example.com")
 # die den API-Token enthält.
 HETZNER_CREDENTIALS_PATH="/etc/letsencrypt/hetzner/credentials.ini"
 
+# Pfad, in dem die isolierte Python Virtual Environment (venv)
+# für Certbot erstellt werden soll.
+VENV_PATH="/opt/certbot-venv"
+
 # Staging-Modus verwenden? (1 = Ja, 0 = Nein)
 # Für Tests immer auf 1 setzen, um keine Let's Encrypt Rate-Limits zu erreichen.
 STAGING=1
