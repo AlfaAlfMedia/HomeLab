@@ -323,7 +323,7 @@ else
     if command -v sudo &> /dev/null; then
         sudo apt update && \
         sudo apt full-upgrade -y && \
-        sudo apt install -y curl sudo wget git nano htop dnsutils tcpdump ufw tree net-tools
+        sudo apt install -y curl sudo wget git nano htop micro dnsutils tcpdump ufw tree net-tools
         if [ $? -ne 0 ]; then echo "[FEHLER] Während des Systemupdates oder der Tool-Installation mit sudo."; else echo "System aktualisiert und Tools mit sudo erfolgreich installiert."; fi
     else
         echo "[FEHLER] sudo ist nicht verfügbar und Skript nicht als root ausgeführt. Überspringe Paketoperationen."
