@@ -3,7 +3,7 @@
 #        Hetzner Let's Encrypt Certificate Manager (venv-Edition)
 # =================================================================
 #
-# Version: 5.0 (Stabil & Venv-basiert)
+# Version: 5.1 (Stabil & Venv-basiert, korrigierter Certbot-Aufruf)
 # Zweck:   Ein robuster Wrapper zur Anforderung von Zertifikaten,
 #          der Certbot und seine Plugins sicher in einer isolierten
 #          Python Virtual Environment (venv) verwaltet.
@@ -100,7 +100,7 @@ done
 
 log "Rufe Certbot aus der venv auf für: ${DOMAINS[*]}"
 "$CERTBOT_EXEC" certonly \
-  --dns-hetzner \
+  --authenticator dns-hetzner \
   --dns-hetzner-credentials "$HETZNER_CREDENTIALS_PATH" \
   --non-interactive \
   --agree-tos \
