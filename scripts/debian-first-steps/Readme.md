@@ -15,7 +15,7 @@ Das Skript führt die folgenden Aktionen aus:
 
 2.  **Systemaktualisierung und Tool-Installation:**
     * Führt `apt update` und `apt full-upgrade` aus.
-    * Installiert eine Auswahl nützlicher Basistools: `curl`, `sudo`, `wget`, `git`, `nano`, `htop`, `dnsutils`, `tcpdump`, `ufw`, `tree`, `net-tools`.
+    * Installiert eine Auswahl nützlicher Basistools: `curl`, `sudo`, `wget`, `git`, `nano`, `micro`, `htop`, `dnsutils`, `tcpdump`, `ufw`, `tree`, `net-tools`.
 
 3.  **Gruppenmanagement und Benutzerberechtigungen:**
     * Erstellt die Gruppe `ssh`, falls sie nicht existiert.
