@@ -10,6 +10,7 @@ Dieser Ansatz garantiert eine funktionierende Installation, ohne das Host-System
 * **Vollautomatisiert:** Ein einziges Skript, das die `venv` einrichtet, Abhängigkeiten installiert, Zertifikate abruft **und die automatische Erneuerung einrichtet**.
 * **Sicher & GitHub-Ready:** Saubere Trennung von Logik, Konfiguration und sensiblen Zugangsdaten.
 * **Transparentes Logging:** Alle Ausgaben werden auf der Konsole angezeigt und parallel in eine Log-Datei geschrieben.
+* **Inklusive Erneuerung:** Die Anleitung enthält eine fertige `systemd`-Unit zur Einrichtung der vollautomatischen Zertifikatserneuerung.
 
 ## Dateien in diesem Repository
 
@@ -95,7 +96,7 @@ Dieses Flag wird normalerweise nur dieses eine Mal benötigt.
 Nachdem du dein erstes Produktions-Zertifikat erhalten hast, kannst du mit einem einzigen Befehl die automatische Erneuerung einrichten.
 
 ```bash
-sudo /usr/local/sbin/hetzner-cert-manager.sh setup-renewal
+sudo /usr/local/sbin/hetzner-cert-manager.sh --setup-renewal
 ```
 Dieser Befehl erledigt alles Notwendige:
 * Erstellt einen `systemd`-Service, der den `certbot renew` Befehl aus der `venv` aufruft.
