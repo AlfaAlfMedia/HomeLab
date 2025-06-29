@@ -22,6 +22,7 @@ Das Plugin selbst ist ein eigenständiges Werkzeug und liest seine eigene, minim
 * `hetzner-cert-manager.sh`: Das ausführbare Hauptskript.
 * `config.conf.example`: Eine Vorlage für die Skript-Konfiguration.
 * `credentials.ini.example`: Eine Vorlage für die Zugangsdaten des Hetzner-Plugins.
+* `hetzner-cert-manager`: Eine Vorlage für /etc/logrotate.d/
 * `.gitignore`: Verhindert das Committen der lokalen Konfigurationsdateien.
 * `README.md`: Diese Anleitung.
 
