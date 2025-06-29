@@ -3,7 +3,7 @@
 #        Hetzner Let's Encrypt Certificate Manager (venv-Edition)
 # =================================================================
 #
-# Version: 5.3 (Stabil & Venv-basiert, inkl. setup-renewal)
+# Version: 5.3 (Stabil & Venv-basiert, korrigierter Router)
 # Zweck:   Ein robuster Wrapper zur Anforderung von Zertifikaten,
 #          der Certbot und seine Plugins sicher in einer isolierten
 #          Python Virtual Environment (venv) verwaltet und die
@@ -118,13 +118,8 @@ EOF
     systemctl list-timers | grep 'certbot-renew.timer'
 }
 
-
 main_get_cert() {
-    # Lade Konfiguration und richte Logging für diesen Prozess ein
-    load_config
-    setup_logging
-    check_root
-
+    # HINWEIS: Die Initialisierungsfunktionen (load_config etc.) werden jetzt VOR diesem Aufruf ausgeführt.
     log "Starte den Zertifikats-Manager..."
     setup_venv
 
@@ -172,12 +167,14 @@ main_get_cert() {
 
 # --- Skript-Router (Haupteinstiegspunkt) ---
 
+# Initialisierung wird immer zuerst ausgeführt.
+load_config
+setup_logging
+check_root
+
 # Prüfe auf spezielle Kommandos. Wenn keines gegeben ist, wird die Standardaktion ausgeführt.
 case "$1" in
     setup-renewal)
-        load_config # Muss zuerst geladen werden, um VENV_PATH zu kennen
-        setup_logging
-        check_root
         setup_renewal_service
         ;;
     *)
