@@ -3,7 +3,7 @@
 #        Hetzner Let's Encrypt Certificate Manager (venv-Edition)
 # =================================================================
 #
-# Version: 5.1 (Stabil & Venv-basiert, korrigierter Certbot-Aufruf)
+# Version: 5.2 (Stabil & Venv-basiert, unterstützt --force-renewal)
 # Zweck:   Ein robuster Wrapper zur Anforderung von Zertifikaten,
 #          der Certbot und seine Plugins sicher in einer isolierten
 #          Python Virtual Environment (venv) verwaltet.
@@ -92,6 +92,14 @@ if [ "$STAGING" -eq 1 ]; then
     log "STAGING-Modus ist aktiviert."
 fi
 
+# Force-Renewal-Option prüfen
+force_renewal_option=""
+# Wir prüfen, ob "--force-renewal" als Argument an das Skript übergeben wurde
+if [[ " $@ " =~ " --force-renewal " ]]; then
+    log "ERZWUNGENE ERNEUERUNG: --force-renewal Flag wurde erkannt."
+    force_renewal_option="--force-renewal"
+fi
+
 # Domain-Flags
 domain_flags=()
 for d in "${DOMAINS[@]}"; do
@@ -106,9 +114,11 @@ log "Rufe Certbot aus der venv auf für: ${DOMAINS[*]}"
   --agree-tos \
   -m "$EMAIL" \
   "${domain_flags[@]}" \
-  $staging_option
+  $staging_option \
+  $force_renewal_option
 
 log "-------------------------------------------"
 log "Zertifikatsprozess erfolgreich abgeschlossen!"
 log "WICHTIG: Die automatische Erneuerung muss manuell eingerichtet werden (siehe README.md)."
 log "-------------------------------------------"
+
