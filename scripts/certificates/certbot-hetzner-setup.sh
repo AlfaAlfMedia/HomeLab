@@ -11,9 +11,9 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Konfiguration
-DOMAIN="alfaalf-media.de"
-EMAIL="deine@email.de"
-HETZNER_API_TOKEN="DEIN_TOKEN_HIER"
+DOMAIN="<DEINE DOMAIN>"              # Deine Domain
+EMAIL="<DEINE E-MAIL>"               # Deine E-Mail für Let's Encrypt
+HETZNER_API_TOKEN=">DEIN_API_TOKEN>" # Dein Hetzner DNS API Token
 VENV_DIR="/opt/certbot"
 CREDENTIALS_DIR="/etc/letsencrypt/hetzner"
 WEBSERVER="nginx"  # oder "apache2"
