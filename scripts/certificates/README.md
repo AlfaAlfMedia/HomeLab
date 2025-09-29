@@ -310,5 +310,3 @@ Bei Fragen oder Problemen:
 - Offizielle Certbot Dokumentation: https://eff-certbot.readthedocs.io/
 
 ---
-
-**Hinweis:** Ersetze `alfaalf-media.de` mit deiner eigenen Domain und `DEIN-USERNAME/DEIN-REPO` mit deinem GitHub Repository.
