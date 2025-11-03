@@ -1,10 +1,17 @@
-# Certbot Hetzner DNS Setup Script
+# Certbot Hetzner Cloud DNS Setup Script
 
-Automatisches Setup-Skript für Let's Encrypt SSL-Zertifikate mit Hetzner DNS API Validierung in einer isolierten Python Virtual Environment.
+Automatisches Setup-Skript für Let's Encrypt SSL-Zertifikate mit der **neuen Hetzner Cloud DNS API** in einer isolierten Python Virtual Environment.
+
+## ⚠️ Wichtig: Neue Hetzner Cloud API
+
+Dieses Skript verwendet das **neue** `certbot-dns-hetzner-cloud` Plugin für die Hetzner Cloud DNS API. Wenn deine Domain noch in der alten DNS Console (dns.hetzner.com) ist, musst du sie zuerst zur [Hetzner Console](https://console.hetzner.cloud) migrieren.
+
+**Nicht kompatibel mit:** Alter DNS Console (wird Mai 2026 abgeschaltet)  
+**Kompatibel mit:** Neue Hetzner Cloud DNS API
 
 ## 🎯 Features
 
-- ✅ Vollautomatische Einrichtung von Certbot mit Hetzner DNS Plugin
+- ✅ Vollautomatische Einrichtung von Certbot mit Hetzner Cloud DNS Plugin
 - ✅ Isolierte Python Virtual Environment (keine Systemkonflikte)
 - ✅ Wildcard-Zertifikate (`*.domain.de`)
 - ✅ ECDSA-Schlüssel für bessere Performance
@@ -16,8 +23,8 @@ Automatisches Setup-Skript für Let's Encrypt SSL-Zertifikate mit Hetzner DNS AP
 ## 📋 Voraussetzungen
 
 - Ubuntu/Debian Linux Server mit root-Zugriff
-- Domain bei Hetzner DNS verwaltet
-- Hetzner DNS API Token ([Anleitung](#hetzner-api-token-erstellen))
+- Domain in der neuen Hetzner Console migriert
+- Hetzner Cloud API Token ([Anleitung](#hetzner-cloud-api-token-erstellen))
 - Nginx oder Apache2 Webserver
 
 ## 🚀 Installation
@@ -25,9 +32,9 @@ Automatisches Setup-Skript für Let's Encrypt SSL-Zertifikate mit Hetzner DNS AP
 ### 1. Skript herunterladen
 
 ```bash
-wget https://raw.githubusercontent.com/AlfaAlfMedia/HomeLab/main/scripts/certificates/certbot-hetzner-setup.sh
+wget https://raw.githubusercontent.com/DEIN-USERNAME/DEIN-REPO/main/certbot-hetzner-setup.sh
 # oder
-curl -O https://raw.githubusercontent.com/AlfaAlfMedia/HomeLab/main/scripts/certificates/certbot-hetzner-setup.sh
+curl -O https://raw.githubusercontent.com/DEIN-USERNAME/DEIN-REPO/main/certbot-hetzner-setup.sh
 ```
 
 ### 2. Skript konfigurieren
@@ -41,10 +48,10 @@ nano certbot-hetzner-setup.sh
 Ändere folgende Zeilen:
 
 ```bash
-DOMAIN="<DEINE DOMAIN>"              # Deine Domain
-EMAIL="<DEINE E-MAIL>"               # Deine E-Mail für Let's Encrypt
-HETZNER_API_TOKEN=">DEIN_API_TOKEN>" # Dein Hetzner DNS API Token
-WEBSERVER="nginx"                    # "nginx" oder "apache2"
+DOMAIN="alfaalf-media.de"           # Deine Domain
+EMAIL="deine@email.de"              # Deine E-Mail für Let's Encrypt
+HETZNER_API_TOKEN="DEIN_TOKEN_HIER" # Dein Hetzner DNS API Token
+WEBSERVER="nginx"                   # "nginx" oder "apache2"
 ```
 
 ### 3. Skript ausführbar machen
@@ -310,3 +317,5 @@ Bei Fragen oder Problemen:
 - Offizielle Certbot Dokumentation: https://eff-certbot.readthedocs.io/
 
 ---
+
+**Hinweis:** Ersetze `alfaalf-media.de` mit deiner eigenen Domain und `DEIN-USERNAME/DEIN-REPO` mit deinem GitHub Repository.
