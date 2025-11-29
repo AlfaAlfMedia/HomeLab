@@ -3,7 +3,7 @@
 # ZSH Installation & Konfiguration
 # ====================
 # Skript installiert zsh mit Plugins und richtet eine vorkonfigurierte .zshrc ein
-# Autor: https://github.com/yourusername
+# Autor: https://github.com/AlfaAlfMedia
 # Lizenz: MIT
 
 set -e  # Bei Fehler abbrechen
