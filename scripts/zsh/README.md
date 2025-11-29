@@ -24,7 +24,7 @@ Automatisches Installations-Skript für ZSH mit optimierter Konfiguration und Pl
 
 ```bash
 # Skript direkt von GitHub herunterladen
-wget https://raw.githubusercontent.com/AlfaAlfMedia/HomeLab/blob/main/scripts/zsh/install-zsh.sh
+wget https://raw.githubusercontent.com/AlfaAlfMedia/HomeLab/main/scripts/zsh/install-zsh.sh
 
 # Ausführbar machen
 chmod +x install-zsh.sh
