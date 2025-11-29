@@ -20,15 +20,37 @@ Automatisches Installations-Skript für ZSH mit optimierter Konfiguration und Pl
 
 ## Schnellinstallation
 
-```bash
-# Repository klonen
-git clone https://github.com/yourusername/zsh-config.git
-cd zsh-config
+### Option 1: Einzelne Datei herunterladen
 
-# Skript ausführbar machen
+```bash
+# Skript direkt von GitHub herunterladen
+wget https://raw.githubusercontent.com/AlfaAlfMedia/HomeLab/blob/main/scripts/zsh/install-zsh.sh
+
+# Ausführbar machen
 chmod +x install-zsh.sh
 
 # Installation starten (als root)
+sudo ./install-zsh.sh
+```
+
+### Option 2: Aus bestehendem Repository
+
+Wenn du das HomeLab-Repository bereits geklont hast:
+
+```bash
+cd ~/HomeLab/scripts/zsh
+chmod +x install-zsh.sh
+sudo ./install-zsh.sh
+```
+
+### Option 3: Manuelle Erstellung
+
+Kopiere den Inhalt von `install-zsh.sh` in eine neue Datei:
+
+```bash
+nano install-zsh.sh
+# Inhalt einfügen, speichern
+chmod +x install-zsh.sh
 sudo ./install-zsh.sh
 ```
 
@@ -156,4 +178,16 @@ Pull Requests sind willkommen! Für größere Änderungen bitte zuerst ein Issue
 
 ## Support
 
-Bei Problemen bitte ein Issue erstellen: https://github.com/yourusername/zsh-config/issues
+Bei Problemen bitte ein Issue erstellen: https://github.com/AlfaAlfMedia/HomeLab/issues
+
+## Verzeichnisstruktur im Repository
+
+```
+HomeLab/
+└── scripts/
+    └── zsh/
+        ├── install-zsh.sh
+        ├── .zshrc
+        ├── README.md
+        └── LICENSE
+```
