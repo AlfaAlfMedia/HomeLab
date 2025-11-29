@@ -102,7 +102,7 @@ autoload -U colors && colors
 
 # Prompt aufbauen
 PROMPT='
-%T >> %B%F{green}%n%f@%F{yellow}%m%f:%b%F{grey}%~%f
+%T >> %B%F{green}%n%f@%F{yellow}%m%f:%b%F{cyan}%~%f
 %# '
 
 # Optional: Rechtsseitiger Prompt mit Uhrzeit
