@@ -129,7 +129,7 @@ pipx ensurepath
 
 1. **API-Token von Technitium holen:**
    - Technitium Web-Oberfläche öffnen
-   - Zu **Settings** → **API** gehen
+   - Zu **Profilname** → **Create API Token** gehen
    - API-Token kopieren
 
 2. **Skript bearbeiten:**
