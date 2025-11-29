@@ -29,8 +29,8 @@ from typing import List, Dict, Tuple
 # ============================================================================
 
 API_URL = "http://localhost:5380"
-API_TOKEN = "YOUR_API_TOKEN_HERE"  # Get from Technitium Web UI -> Settings -> API
-ZONE_NAME = "alfaalf-media.com"     # The forward zone to process
+API_TOKEN = "YOUR_API_TOKEN_HERE"  # Get from Technitium Web UI -> your name -> Create API Token
+ZONE_NAME = "example.com"          # The forward zone to process
 
 # Optional: Dry run mode - if True, only shows what would be done without making changes
 DRY_RUN = False
