@@ -29,8 +29,8 @@ from typing import List, Dict, Tuple
 # ============================================================================
 
 API_URL = "http://localhost:5380"
-API_TOKEN = "YOUR_API_TOKEN_HERE"  # Get from Technitium Web UI -> your name -> Create API Token
-ZONE_NAME = "example.com"          # The forward zone to process
+API_TOKEN = "YOUR_API_TOKEN_HERE"   # Get from Technitium Web UI -> your account -> Create API Token
+ZONE_NAME = "example.com"           # The forward zone to process
 
 # Optional: Dry run mode - if True, only shows what would be done without making changes
 DRY_RUN = False
@@ -64,13 +64,13 @@ class TechnitiumAPI:
     
     def get_zone_records(self, zone: str, record_type: str = None) -> List[Dict]:
         """Get all records from a zone"""
-        params = {'domain': zone}
+        params = {'domain': zone, 'listZone': 'true'}
         if record_type:
             params['type'] = record_type
         
         result = self._request('zones/records/get', params)
         if result.get('status') == 'ok':
-            return result.get('records', [])
+            return result.get('response', {}).get('records', [])
         else:
             print(f"❌ Failed to get records: {result.get('errorMessage', 'Unknown error')}")
             return []
