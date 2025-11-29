@@ -1,182 +1,310 @@
 # Technitium DNS Auto-PTR Generator
 
-Automatically create reverse DNS (PTR) records in Technitium DNS Server from existing A and AAAA records.
+Automatische Erstellung von Reverse-DNS (PTR) Records in Technitium DNS Server aus vorhandenen A und AAAA Records.
 
 ## 🎯 Problem
 
-Managing reverse DNS (PTR records) manually is tedious and error-prone, especially when you have dozens or hundreds of forward DNS records. This script automates the entire process.
+Die manuelle Pflege von Reverse-DNS (PTR Records) ist mühsam und fehleranfällig, besonders wenn man Dutzende oder Hunderte von Forward-DNS-Einträgen hat. Dieses Skript automatisiert den gesamten Prozess.
 
 ## ✨ Features
 
-- ✅ Automatically processes all A and AAAA records in a zone
-- ✅ Calculates correct reverse zones for both IPv4 and IPv6
-- ✅ Creates reverse zones if they don't exist
-- ✅ Supports multiple IP networks in a single forward zone
-- ✅ Dry-run mode to preview changes
-- ✅ Clear progress output with emojis
-- ✅ Error handling and validation
+- ✅ Verarbeitet automatisch alle A und AAAA Records einer Zone
+- ✅ Berechnet korrekte Reverse-Zonen für IPv4 und IPv6
+- ✅ Erstellt fehlende Reverse-Zonen automatisch
+- ✅ Unterstützt mehrere IP-Netze in einer einzigen Forward-Zone
+- ✅ Dry-Run-Modus zum Testen ohne Änderungen
+- ✅ Übersichtliche Fortschrittsanzeige
+- ✅ Fehlerbehandlung und Validierung
 
-## 📋 Requirements
+## 📋 Voraussetzungen
 
-- Python 3.6 or higher
-- Technitium DNS Server with API enabled
-- `requests` library
+- Python 3.6 oder höher
+- Technitium DNS Server mit aktivierter API
+- `requests` Bibliothek (wird automatisch installiert)
 
 ## 🚀 Installation
 
-Download the script directly from GitHub:
+### Methode 1: Direkt ausführen (empfohlen für einmalige Nutzung)
 
 ```bash
-# Download the script
+# Skript herunterladen
 wget https://raw.githubusercontent.com/AlfaAlfMedia/HomeLab/main/scripts/technitium/technitium-auto-ptr.py
 
-# Make it executable
+# Ausführbar machen
 chmod +x technitium-auto-ptr.py
 
-# Install Python dependencies
+# Mit pipx ausführen (installiert Abhängigkeiten automatisch)
+pipx run --spec requests technitium-auto-ptr.py
+```
+
+### Methode 2: Mit Virtual Environment (sauberste Methode)
+
+```bash
+# Skript herunterladen
+wget https://raw.githubusercontent.com/AlfaAlfMedia/HomeLab/main/scripts/technitium/technitium-auto-ptr.py
+
+# Virtual Environment erstellen
+python3 -m venv technitium-env
+
+# Virtual Environment aktivieren
+source technitium-env/bin/activate
+
+# Abhängigkeiten installieren
+pip install requests
+
+# Skript ausführen
+python3 technitium-auto-ptr.py
+
+# Nach der Nutzung: Virtual Environment deaktivieren
+deactivate
+```
+
+### Methode 3: Systemweite Installation (nicht empfohlen)
+
+```bash
+# Skript herunterladen
+wget https://raw.githubusercontent.com/AlfaAlfMedia/HomeLab/main/scripts/technitium/technitium-auto-ptr.py
+
+# Abhängigkeiten installieren
 pip3 install requests
+
+# Skript ausführen
+python3 technitium-auto-ptr.py
 ```
 
-## ⚙️ Configuration
+## 🖥️ Python Installation
 
-1. Get your API token from Technitium:
-   - Open Technitium Web UI
-   - Go to **Settings** → **API**
-   - Copy your API token
+### Linux (Debian/Ubuntu)
 
-2. Edit the script configuration:
+```bash
+# Python und pip installieren
+sudo apt update
+sudo apt install python3 python3-pip python3-venv
+
+# Optional: pipx für isolierte Skript-Ausführung
+sudo apt install pipx
+pipx ensurepath
+```
+
+### Linux (RHEL/CentOS/Fedora)
+
+```bash
+# Python und pip installieren
+sudo dnf install python3 python3-pip
+
+# Optional: pipx
+sudo dnf install pipx
+pipx ensurepath
+```
+
+### macOS
+
+```bash
+# Mit Homebrew
+brew install python3
+
+# Optional: pipx
+brew install pipx
+pipx ensurepath
+```
+
+### Windows
+
+1. Python von [python.org](https://www.python.org/downloads/) herunterladen
+2. Installer ausführen und **"Add Python to PATH"** anhaken
+3. PowerShell oder CMD öffnen:
+
+```powershell
+# Prüfen ob Python installiert ist
+python --version
+
+# pipx installieren (optional)
+pip install pipx
+pipx ensurepath
+```
+
+**Wichtig für Windows:** Nach der Installation Terminal neu starten!
+
+## ⚙️ Konfiguration
+
+1. **API-Token von Technitium holen:**
+   - Technitium Web-Oberfläche öffnen
+   - Zu **Settings** → **API** gehen
+   - API-Token kopieren
+
+2. **Skript bearbeiten:**
+
+```bash
+# Mit einem Text-Editor öffnen
+nano technitium-auto-ptr.py
+```
+
+3. **Diese Werte anpassen:**
+
 ```python
-API_URL = "http://localhost:5380"  # Default Technitium API URL
-API_TOKEN = "YOUR_API_TOKEN_HERE"   # Paste your API token here
-ZONE_NAME = "example.com"           # Your forward DNS zone
-DRY_RUN = False                     # Set to True to test without making changes
+API_URL = "http://localhost:5380"  # Standard Technitium API URL
+API_TOKEN = "DEIN_API_TOKEN_HIER"  # API-Token hier einfügen
+ZONE_NAME = "beispiel.de"          # Deine Forward-DNS-Zone
+DRY_RUN = False                    # Auf True setzen zum Testen
 ```
 
-## 🎮 Usage
+## 🎮 Verwendung
 
-### Test run (recommended first):
+### Testlauf (empfohlen beim ersten Mal)
+
+```python
+# Im Skript einstellen:
+DRY_RUN = True
+```
+
 ```bash
-# Edit script and set DRY_RUN = True
 python3 technitium-auto-ptr.py
 ```
 
-### Actual execution:
+Das Skript zeigt an, was es tun würde, ohne tatsächlich Änderungen vorzunehmen.
+
+### Tatsächliche Ausführung
+
+```python
+# Im Skript einstellen:
+DRY_RUN = False
+```
+
 ```bash
-# Edit script and set DRY_RUN = False
 python3 technitium-auto-ptr.py
 ```
 
-## 📖 Example Output
+## 📖 Beispiel-Ausgabe
 
 ```
 ======================================================================
 Technitium DNS Auto-PTR Generator
 ======================================================================
 
-🔌 Connecting to Technitium at http://localhost:5380
-📋 Fetching records from zone: alfaalf-media.com
+🔌 Verbinde zu Technitium auf http://localhost:5380
+📋 Lade Records aus Zone: alfaalf-media.com
 
-✅ Found 75 A records and 15 AAAA records
+✅ 75 A-Records und 15 AAAA-Records gefunden
 
-🔍 Checking reverse zones...
+🔍 Prüfe Reverse-Zonen...
 
-  ✅ 1.168.192.in-addr.arpa - exists
-  ⚠️  5.10.172.in-addr.arpa - does not exist
-      Creating zone: 5.10.172.in-addr.arpa
-      ✅ Zone created successfully
+  ✅ 1.168.192.in-addr.arpa - existiert
+  ⚠️  5.10.172.in-addr.arpa - existiert nicht
+      Erstelle Zone: 5.10.172.in-addr.arpa
+      ✅ Zone erfolgreich erstellt
 
 ======================================================================
-Creating PTR records...
+Erstelle PTR Records...
 ======================================================================
 
 📝 server.alfaalf-media.com (A) -> 192.168.1.10
    PTR: 10.1.168.192.in-addr.arpa -> server.alfaalf-media.com
-   ✅ Created
+   ✅ Erstellt
 
 📝 nas.alfaalf-media.com (A) -> 172.10.5.20
    PTR: 20.5.10.172.in-addr.arpa -> nas.alfaalf-media.com
-   ✅ Created
+   ✅ Erstellt
 
 ...
 
 ======================================================================
-Summary
+Zusammenfassung
 ======================================================================
-✅ Successfully created: 90
+✅ Erfolgreich erstellt: 90
 ```
 
-## 🔧 How It Works
+## 🔧 So funktioniert es
 
-1. **Fetches all A and AAAA records** from your specified zone via Technitium API
-2. **Calculates reverse zones**:
-   - IPv4: Uses /24 networks (e.g., `192.168.1.x` → `1.168.192.in-addr.arpa`)
-   - IPv6: Uses /64 networks (e.g., `2001:db8::/64` → reverse IP6.ARPA zone)
-3. **Creates missing reverse zones** automatically as Primary zones
-4. **Adds PTR records** for each forward record
+1. **Lädt alle A und AAAA Records** aus der angegebenen Zone via Technitium API
+2. **Berechnet Reverse-Zonen:**
+   - IPv4: Nutzt /24-Netze (z.B. `192.168.1.x` → `1.168.192.in-addr.arpa`)
+   - IPv6: Nutzt /64-Netze (z.B. `2001:db8::/64` → entsprechende IP6.ARPA Zone)
+3. **Erstellt fehlende Reverse-Zonen** automatisch als Primary-Zonen
+4. **Fügt PTR Records hinzu** für jeden Forward-Record
 
-## 🏗️ Reverse Zone Creation
+## 🏗️ Reverse-Zone-Erstellung
 
-The script automatically determines which reverse zones are needed based on your IP addresses:
+Das Skript ermittelt automatisch, welche Reverse-Zonen benötigt werden, basierend auf deinen IP-Adressen:
 
-**IPv4 Example:**
-- Forward: `server.example.com` → `192.168.1.10`
-- Creates zone: `1.168.192.in-addr.arpa`
-- Adds PTR: `10.1.168.192.in-addr.arpa` → `server.example.com`
+**IPv4 Beispiel:**
+- Forward: `server.beispiel.de` → `192.168.1.10`
+- Erstellt Zone: `1.168.192.in-addr.arpa`
+- Fügt PTR hinzu: `10.1.168.192.in-addr.arpa` → `server.beispiel.de`
 
-**IPv6 Example:**
-- Forward: `server.example.com` → `2001:db8::1`
-- Creates zone: `[appropriate ip6.arpa zone]`
-- Adds PTR: `[full reverse notation]` → `server.example.com`
+**IPv6 Beispiel:**
+- Forward: `server.beispiel.de` → `2001:db8::1`
+- Erstellt Zone: `[entsprechende ip6.arpa Zone]`
+- Fügt PTR hinzu: `[vollständige Reverse-Notation]` → `server.beispiel.de`
 
-## 🛡️ Safety Features
+## 🛡️ Sicherheitsfeatures
 
-- **Dry-run mode**: Test the script without making any changes
-- **API validation**: Checks API connectivity before processing
-- **Zone verification**: Confirms reverse zones exist before adding records
-- **Error handling**: Gracefully handles API errors and invalid IPs
-- **Progress output**: Clear feedback on what's happening
+- **Dry-Run-Modus**: Skript testen ohne Änderungen vorzunehmen
+- **API-Validierung**: Prüft API-Verbindung vor der Verarbeitung
+- **Zonen-Verifizierung**: Bestätigt Existenz der Reverse-Zonen vor dem Hinzufügen von Records
+- **Fehlerbehandlung**: Behandelt API-Fehler und ungültige IPs sauber
+- **Fortschrittsanzeige**: Klares Feedback über den aktuellen Status
 
-## ⚠️ Important Notes
+## ⚠️ Wichtige Hinweise
 
-- The script uses **Technitium's REST API** - ensure API access is enabled
-- PTR records are created with a **3600 second (1 hour) TTL** by default
-- If you run the script multiple times, it may create duplicate PTR records (Technitium allows multiple PTR records per IP)
-- For IPv4, the script assumes **/24 networks** for reverse zones
-- For IPv6, the script assumes **/64 networks** for reverse zones
+- Das Skript nutzt die **Technitium REST API** - stelle sicher, dass der API-Zugriff aktiviert ist
+- PTR Records werden standardmäßig mit einer **TTL von 3600 Sekunden (1 Stunde)** erstellt
+- Bei mehrfacher Ausführung können doppelte PTR Records entstehen (Technitium erlaubt mehrere PTR Records pro IP)
+- Für IPv4 verwendet das Skript **/24-Netze** für Reverse-Zonen
+- Für IPv6 verwendet das Skript **/64-Netze** für Reverse-Zonen
 
-## 🤝 Contributing
+## 🌍 Plattform-Kompatibilität
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Das Skript läuft auf allen Plattformen mit Python 3.6+:
 
-## 📄 License
+- ✅ **Linux** (Debian, Ubuntu, RHEL, CentOS, Fedora, Arch, etc.)
+- ✅ **macOS** (Intel und Apple Silicon)
+- ✅ **Windows** (10, 11, Server)
+- ✅ **BSD** (FreeBSD, OpenBSD)
+- ✅ **Raspberry Pi** (Raspberry Pi OS)
 
-MIT License - feel free to use and modify as needed.
+## 🤝 Beiträge
+
+Verbesserungen und Pull Requests sind willkommen!
+
+## 📄 Lizenz
+
+MIT License - Frei verwendbar und anpassbar.
 
 ## 🙏 Credits
 
-Part of the [AlfaAlfMedia HomeLab](https://github.com/AlfaAlfMedia/HomeLab) script collection.
+Teil der [AlfaAlfMedia HomeLab](https://github.com/AlfaAlfMedia/HomeLab) Skript-Sammlung.
 
-## 📚 Related Resources
+## 📚 Weiterführende Links
 
 - [AlfaAlfMedia HomeLab Repository](https://github.com/AlfaAlfMedia/HomeLab)
 - [Technitium DNS Server](https://technitium.com/dns/)
-- [Technitium API Documentation](https://github.com/TechnitiumSoftware/DnsServer/blob/master/APIDOCS.md)
+- [Technitium API Dokumentation](https://github.com/TechnitiumSoftware/DnsServer/blob/master/APIDOCS.md)
 - [RFC 1035 - Domain Names](https://www.rfc-editor.org/rfc/rfc1035)
-- [RFC 3596 - DNS Extensions for IPv6](https://www.rfc-editor.org/rfc/rfc3596)
+- [RFC 3596 - DNS Extensions für IPv6](https://www.rfc-editor.org/rfc/rfc3596)
 
-## ❓ Troubleshooting
+## ❓ Fehlerbehebung
 
 **"API Error: Connection refused"**
-- Check that Technitium is running
-- Verify API_URL is correct (default: `http://localhost:5380`)
+- Prüfe, ob Technitium läuft
+- Überprüfe die API_URL (Standard: `http://localhost:5380`)
 
 **"Please configure your API_TOKEN"**
-- You need to set your actual API token from Technitium Settings → API
+- Du musst deinen tatsächlichen API-Token aus Technitium Settings → API eintragen
 
 **"No A or AAAA records found"**
-- Check that ZONE_NAME is correct
-- Ensure the zone exists and has records
+- Prüfe, ob ZONE_NAME korrekt ist
+- Stelle sicher, dass die Zone existiert und Records enthält
 
-**PTR records not resolving**
-- Ensure your DNS clients are configured to use your Technitium server
-- Check that reverse zones are properly delegated if using public IPs
+**PTR Records werden nicht aufgelöst**
+- Stelle sicher, dass deine DNS-Clients deinen Technitium-Server verwenden
+- Prüfe, ob Reverse-Zonen korrekt delegiert sind (bei öffentlichen IPs)
+
+**Python-Fehler unter Windows**
+- Stelle sicher, dass Python während der Installation zu PATH hinzugefügt wurde
+- Versuche `py` statt `python3` zu verwenden
+- Terminal nach der Installation neu starten
+
+**"ModuleNotFoundError: No module named 'requests'"**
+- Virtual Environment aktivieren (`source technitium-env/bin/activate`)
+- Oder `pip install requests` ausführen
+- Oder `pipx run --spec requests technitium-auto-ptr.py` verwenden
