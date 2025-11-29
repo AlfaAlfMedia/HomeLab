@@ -49,7 +49,7 @@ autoload -U colors && colors
 #PROMPT='%B%F{green}%n@%m%f%b:%F{blue}%~%f
 #%# '
 PROMPT='
-%T >> %B%F{green}%n%f@%F{yellow}%m%f:%b%F{grey}%~%f
+%T >> %B%F{green}%n%f@%F{yellow}%m%f:%b%F{cyan}%~%f
 %# '
 
 # Optional: Rechtsseitiger Prompt mit Uhrzeit
@@ -71,6 +71,11 @@ alias grep='grep --color=auto'
 # ---- Keybindings ----
 # Emacs-Style (für Ctrl+A, Ctrl+E etc.)
 bindkey -e
+bindkey "^[[H"    beginning-of-line   # Pos1
+bindkey "^[[F"    end-of-line         # Ende
+bindkey "^[[3~"   delete-char         # Entf
+bindkey "^[[1;5C" forward-word        # Ctrl+Pfeil rechts
+bindkey "^[[1;5D" backward-word       # Ctrl+Pfeil links
 
 # Pfeiltasten für History-Suche (mit bereits getipptem Präfix)
 autoload -U up-line-or-beginning-search
